@@ -13,17 +13,20 @@ var fs = require('fs');
 
 app.listen(3000);
 
-function handler (req, res) {
-	  fs.readFile(__dirname + '/index.html',
-			    function (err, data) {
-				        if (err) {
-						      res.writeHead(500);
-						            return res.end('Error loading index.html');
-							        }
+function handler (req, res) 
+{
+	fs.readFile(__dirname + '/index.html',
+	function (err, data) 
+	{
+		if (err) 
+		{
+			res.writeHead(500);
+			return res.end('Error loading index.html');
+		}
 					
-					    res.writeHead(200);
-					        res.end(data);
-						  });
+		res.writeHead(200);
+		res.end(data);
+	});
 }
 
 io.on('connection', function (socket) 
@@ -33,7 +36,6 @@ io.on('connection', function (socket)
 	socket.on('command', function (command) 
 	{
 		console.log(command);
-		//socket.emit('status', runCommand(command));
 		runCommand(command, socket);
 	});
 });
@@ -46,14 +48,14 @@ function runCommand(command, socket)
 		switch(splitted[0])
 		{
 			case 'setTemperature' : 
-						xmlrpcClient.methodCall('setValue', [splitted[1].concat(':4'), 
-									'SET_TEMPERATURE', splitted[2]], 
-									function (error, value) 
-									{
-										if (error)
-											socket.emit('status', error['faultString']);
-									});
-						break;
+							xmlrpcClient.methodCall('setValue', [splitted[1].concat(':4'), 
+							'SET_TEMPERATURE', splitted[2]], 
+							function (error, value) 
+							{
+							if (error)
+								socket.emit('status', error['faultString']);
+							});
+							break;
 
 			default: return "Command not found!";
 		}
@@ -63,25 +65,23 @@ function runCommand(command, socket)
 		switch(splitted[0])
 		{
 			case 'listDevices' :
-						xmlrpcClient.methodCall('listDevices',[false, ["ADDRESS"]],  
-									function (error, value) 
-									{
-										if (error)
-											socket.emit('status', error['faultString']);
-										else
-										{
-											addresses = [];
-											for (var i=0; i< value.length; i++)
-											{
-												addresses.push(value[i]["ADDRESS"]);		
-											}
-											socket.emit('status', JSON.stringify({"DEVICES" : addresses}));
-										}
-									});
-						break;
-			default: return "Command not found!";
-						
+							xmlrpcClient.methodCall('listDevices',[false, ["ADDRESS"]],  
+							function (error, value) 
+							{
+								if (error)
+									socket.emit('status', error['faultString']);
+								else
+								{
+									addresses = [];
+									for (var i=0; i< value.length; i++)
+										addresses.push(value[i]["ADDRESS"]);		
+												
+									socket.emit('status', JSON.stringify({"DEVICES" : addresses}));
+								}
+							});
+							break;
 
+			default: return "Command not found!";
 		}
 	}	
 	
