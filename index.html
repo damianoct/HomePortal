@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+    <head>
+        <script src='socket.io.js'></script>
+        <script>
+	    var socket = io.connect('http://192.168.1.15:3000');	
+        socket.on('welcome', function(data) 
+		{
+        	addMessage(data);
+       	});
+
+		socket.on('status', function(data)
+		{
+			addMessage(data);
+		});
+
+	    function addMessage(message) 
+		{
+        	var text = document.createTextNode(message),
+            el = document.createElement('li'),
+            messages = document.getElementById('messages');
+
+            el.appendChild(text);
+            messages.appendChild(el);
+        }
+
+		function addStatus(status)
+		{
+			
+		}
+
+		function sendCommand()
+		{
+			var command = document.getElementById('TextCommand').value;
+			console.log(command);
+			socket.emit('command', command);
+		}
+        </script>
+    </head>
+    <body>
+		<center>
+			<input type="text" id="TextCommand" />
+			<input type="button" id="SendButton" value="Submit" onclick="sendCommand()" />
+		</center>
+        <ul id='messages'></ul>
+		<ul id='status'><ul>
+    </body>
+</html>
