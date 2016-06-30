@@ -1,3 +1,20 @@
+var TOPIC = 'homematic/status';
+var TOPIC_CMD = 'homematic/command';
+var mqtt    = require('mqtt');
+var client  = mqtt.connect('mqtt://localhost:1883');
+ 
+client.on('connect', function () 
+{
+	console.log("CONNECTED TO BROKER");
+	client.subscribe(TOPIC_CMD);
+	//client.publish('presence', 'Hello mqtt');
+});
+ 
+client.on('message', function (topic, message) 
+{
+	runCommand(message.toString());
+});
+
 var homegearAddress = 'localhost'
 var homegearPort = 2001
 var xmlrpcServerAddress = 'localhost'
@@ -39,6 +56,53 @@ io.on('connection', function (socket)
 		runCommand(command, socket);
 	});
 });
+
+function runCommand(command)
+{
+	var splitted = command.split('_');
+	if (splitted.length > 1) //comando con parametri
+	{
+		switch(splitted[0])
+		{
+			case 'setTemperature' : 
+							xmlrpcClient.methodCall('setValue', [splitted[1].concat(':4'), 
+							'SET_TEMPERATURE', splitted[2]], 
+							function (error, value) 
+							{
+							if (error)
+								client.publish(TOPIC, error['faultString']);
+							});
+							break;
+
+			default: return "Command not found!";
+		}
+	}
+	else
+	{
+		switch(splitted[0])
+		{
+			case 'listDevices' :
+							xmlrpcClient.methodCall('listDevices',[false, ["ADDRESS"]],  
+							function (error, value) 
+							{
+								if (error)
+									client.publish(TOPIC, error['faultString']);
+								else
+								{
+									addresses = [];
+									for (var i=0; i< value.length; i++)
+										addresses.push(value[i]["ADDRESS"]);		
+												
+									client.publish(TOPIC, JSON.stringify({"DEVICES" : addresses}));
+								}
+							});
+							break;
+
+			default: return "Command not found!";
+		}
+	}	
+	
+}
 
 function runCommand(command, socket)
 {
@@ -90,12 +154,14 @@ function runCommand(command, socket)
 
 xmlrpcServer.on('system.multicall', function (err, params, callback) 
 {
-	console.log('Method called: \'system.multicall\'');
 	if(params instanceof Array && params[0] instanceof Array) 
 	{
+		
+		var ext_dic = {};
 		var dict = {};
 		var device;
 		var listVars = [];	
+		
 		for(var i = 0; i < params[0].length; i++) 
 		{
 			if(!params[0][i].params || params[0][i].params.length != 4 || params[0].length == 1) continue;
@@ -107,13 +173,20 @@ xmlrpcServer.on('system.multicall', function (err, params, callback)
 				listVars.push([varName, value]);
 			}
 				
-			dict[device] = listVars;
+			dict['status'] = listVars;
+			dict['timestamp'] = Date.now();
+			dict['address_source'] = device;
+
+			ext_dic['homematic'] = dict; //per ogni device creo un JSON completo
+
+
 		}
+
 		if (!isEmpty(dict))
 		{
-			console.log(JSON.stringify(dict));
-			io.emit('status', JSON.stringify(dict));
-
+			//console.log(JSON.stringify(ext_dic));
+			io.emit('status', JSON.stringify(ext_dic));
+			client.publish(TOPIC, JSON.stringify(ext_dic));
 		}
 	}
 			
@@ -128,7 +201,6 @@ setTimeout(function ()
 				['http://' + xmlrpcServerAddress + ':' + xmlrpcServerPort, 'HomegearClient'], 
 				function (error, value) {})
 }, 1000);
-
 
 
 function isEmpty(dic)
