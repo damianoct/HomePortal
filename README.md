@@ -22,4 +22,20 @@ Activate pairing mode
 
 And follow the instruction of your Homematic Device to complete the association's process.
 
-With your device connected to Homegear interfaces you can use the HomePortal to send command with Mqtt.
+All connected device to Homegear have a unique serial number which can help you to identify it in Homegear.
+
+For more information check [Pairing_HomeMatic_BidCoS_Devices](https://www.homegear.eu/index.php/Pairing_HomeMatic_BidCoS_Devices).
+
+With your device connected to Homegear interface you can use the HomePortal to send command with Mqtt.
+
+---
+
+###Send command to device.
+E.g.:
+To set temperature on Wireless Thermostat (HM-CC-RT-DN) you can send this command through MQTT:
+
+`setTemperature_SERIALNUMBER_25`
+
+SERIALNUMBER = The device serial number gained from Homegar during pairing process.
+
+
