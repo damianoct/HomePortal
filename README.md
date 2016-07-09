@@ -31,6 +31,12 @@ With your device connected to Homegear interface you can use the HomePortal to s
 ---
 
 ###Send command to device.
+Start Nodejs server:
+
+`$ node homematic.js`
+
+and open `index.html`
+
 E.g.:
 To set temperature on Wireless Thermostat (HM-CC-RT-DN) you can send this command through MQTT:
 
