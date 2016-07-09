@@ -8,17 +8,17 @@ This Node.js script receive MQTT commands and communicate with the device throug
 
 Once installed and run Homegear and the [hmland](https://git.zerfleddert.de/cgi-bin/gitweb.cgi/hmcfgusb) drivers you need to pair your Homematic devices. To do this:
 
-Run the Homegear client
+run the Homegear client
 
-`homegear -r`
+`$ homegear -r`
 
-Select BidCos device family
+select BidCos device family
 
-`fs 0`
+`$ fs 0`
 
-Activate pairing mode
+activate pairing mode
 
-`pon`
+`$ pon`
 
 And follow the instruction of your Homematic Device to complete the association's process.
 
